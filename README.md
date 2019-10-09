@@ -1,0 +1,2 @@
+# monadts
+Fun with flatMap
