@@ -1,0 +1,13 @@
+{
+  "name": "monadts",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^3.6.3"
+  },
+  "dependencies": {
+    "@types/node": "^12.7.12",
+    "ts-node": "^8.4.1"
+  }
+}
