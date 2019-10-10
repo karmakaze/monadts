@@ -1,5 +1,7 @@
 #!/usr/bin/env ./node_modules/.bin/ts-node
 
+namespace Result {
+
 class Result<T> {
     _value: T | undefined;
     _error: any;
@@ -68,3 +70,5 @@ test_sqrt(4);
 test_sqrt2(-1);
 test_sqrt2(4);
 test_sqrt2(16);
+
+}

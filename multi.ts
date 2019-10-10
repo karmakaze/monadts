@@ -1,5 +1,7 @@
 #!/usr/bin/env ./node_modules/.bin/ts-node
 
+namespace Multi {
+
 class Multi<T> {
     ts: T[];
 
@@ -72,3 +74,5 @@ test_sqrt2(4);
 test_sqrt2(16);
 test_multi_sqrt(new Multi<number>(0, 1, 4));
 test_multi_product(new Multi<number>(1, 2, 3), new Multi<number>(5, 7));
+
+}

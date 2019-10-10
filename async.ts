@@ -1,5 +1,7 @@
 #!/usr/bin/env ./node_modules/.bin/ts-node
 
+namespace Async {
+
 async function square(x: number): Promise<number> {
   return x * x;
 }
@@ -51,3 +53,5 @@ function test_asquare(t: number) {
 }
 
 test_asquare(2);
+
+}

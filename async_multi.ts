@@ -1,5 +1,7 @@
 #!/usr/bin/env ./node_modules/.bin/ts-node
 
+namespace AsyncMulti {
+
 class Async<T> {
     future_t: Promise<T>
 
@@ -95,3 +97,5 @@ function test_asquare(t: number) {
 }
 
 test_async_multi(Async.of(3), new Multi<number>(2, 4, 6));
+
+}
