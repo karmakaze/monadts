@@ -2,11 +2,11 @@
 
 namespace Processed {
 
-interface Processed<T, P extends Processed<unknown, P>> {
-    flatMap<U, PU extends Processed<U, P> & P>(f: (x: T) => PU): PU;
+interface Processed<P extends Processed<P, unknown>, T> {
+    flatMap<U>(f: (x: T) => Processed<P, U>): Processed<P, U>;
 }
 
-class Maybe<T> implements Processed<T, Maybe<unknown>> {
+class Maybe<T> implements Processed<Maybe<unknown>, T> {
     x: T | undefined;
 
     public static of<T>(x: T) {
@@ -29,11 +29,11 @@ class Maybe<T> implements Processed<T, Maybe<unknown>> {
         return this.x;
     }
 
-    public flatMap<U, PU extends Processed<U, Maybe<unknown>> & Maybe<unknown>>(f: (x: T) => PU): PU {
+    public flatMap<U>(f: (x: T) => Maybe<U>): Maybe<U> {
         if (this.x) {
             return f(this.x);
         }
-        return <PU><unknown>Maybe.nothing();
+        return Maybe.nothing();
     }
 
     public toString() : string {
@@ -73,7 +73,7 @@ test_positive_sqrt2(16);
 
 console.log();
 
-class Result<T> implements Processed<T, Result<unknown>> {
+class Result<T> implements Processed<Result<unknown>, T> {
     _value: T | undefined;
     _error: any;
 
@@ -98,11 +98,11 @@ class Result<T> implements Processed<T, Result<unknown>> {
         return this._value;
     }
 
-    public flatMap<U, PU extends Processed<U, Result<unknown>> & Result<unknown>>(f: (x: T) => PU): PU {
+    public flatMap<U>(f: (x: T) => Result<U>): Result<U> {
         if (this._value) {
             return f(this._value);
         }
-        return <PU><unknown>Result.error(this._error);
+        return Result.error(this._error);
     }
 
     public toString() : string {
@@ -147,7 +147,7 @@ test_result_sqrt2(16);
 console.log();
 
 
-class Multi<T> implements Processed<T, Multi<unknown>> {
+class Multi<T> implements Processed<Multi<unknown>, T> {
     ts: T[];
 
     public static of<U>(...us: U[]): Multi<U> {
@@ -166,9 +166,9 @@ class Multi<T> implements Processed<T, Multi<unknown>> {
         return this.ts;
     }
 
-    public flatMap<U, PU extends Processed<U, Multi<unknown>> & Multi<unknown>>(f: (t: T) => PU): PU {
+    public flatMap<U>(f: (t: T) => Multi<U>): Multi<U> {
         if (this.isEmpty()) {
-            return <PU><unknown>Multi.of();
+            return Multi.of();
         }
         const us: U[] = [];
                             // ys += f(x).values()
@@ -178,7 +178,7 @@ class Multi<T> implements Processed<T, Multi<unknown>> {
             console.log(`ft = ${ft}`);
             return Array.prototype.push.apply(us, (ft).values());
         });
-        return <PU><unknown>Multi.of(...us);
+        return Multi.of(...us);
     }
 
     public toString() : string {
@@ -231,7 +231,7 @@ test_multi_product(Multi.of(1, 2, 3), Multi.of(5, 7));
 console.log();
 
 
-class Async<T> implements Processed<T, Async<unknown>> {
+class Async<T> implements Processed<Async<unknown>, T> {
     future_t: Promise<T>
 
     public static ofPromise<U>(pu: Promise<U>): Async<U> {
@@ -245,10 +245,10 @@ class Async<T> implements Processed<T, Async<unknown>> {
         this.future_t = future_t;
     }
 
-    public flatMap<U, PU extends Processed<U, Async<unknown>> & Async<unknown>>(f: (t: T) => PU): PU {
-        const pau: Promise<PU> = this.future_t.then(f);
+    public flatMap<U>(f: (t: T) => Async<U>): Async<U> {
+        const pau: Promise<Async<U>> = this.future_t.then(f);
         const executor = (resolve, reject) => pau.then(au => au.future_t.then(resolve).catch(reject));
-        return <PU><unknown>Async.ofPromise(new Promise<U>(executor));
+        return Async.ofPromise(new Promise<U>(executor));
     }
 
     public toString(): string {
@@ -271,9 +271,9 @@ function test_async_square(t: number) {
 
 console.log("======== Compose test ========");
 
-function compose<T, U, V, PU extends Processed<U, PU>,
-                          PV extends Processed<V, PV>,
-                          PPV extends Processed<PV, PPV>>
+function compose<T, U, V, PU extends Processed<PU, U>,
+                          PV extends Processed<PV, V>,
+                          PPV extends Processed<PPV, PV>>
                 (f: (t: T) => PU, g: (u: U) => PV, make: (pv: PV) => PPV): (t: T) => PPV {
     return (t: T) => {
         const pu: PU = f(t);
