@@ -74,7 +74,7 @@ test_positive_sqrt2(16);
 console.log();
 
 class Result<T> implements Processed<Result<unknown>, T> {
-    _value: T | undefined;
+    _value: T|undefined;
     _error: any;
 
     public static value<T>(value: T): Result<T> {
@@ -94,7 +94,7 @@ class Result<T> implements Processed<Result<unknown>, T> {
         return this._value === undefined;
     }
 
-    public value(): T | undefined {
+    public value(): T|undefined {
         return this._value;
     }
 
@@ -150,8 +150,8 @@ console.log();
 class Multi<T> implements Processed<Multi<unknown>, T> {
     ts: T[];
 
-    public static of<U>(...us: U[]): Multi<U> {
-        return new Multi<U>(...us);
+    public static of<V>(...vs: V[]): Multi<V> {
+        return new Multi<V>(...vs);
     }
 
     private constructor(...ts: T[]) {
@@ -174,8 +174,8 @@ class Multi<T> implements Processed<Multi<unknown>, T> {
                             // ys += f(x).values()
                             // ys.push(values[0], values[1], ... , values[m])
         this.ts.forEach((t) => {
-            const ft = <Multi<U>><unknown>f(t);
-            console.log(`ft = ${ft}`);
+            const ft = f(t);
+            console.log(`-> f(${t}) = ${ft}`);
             return Array.prototype.push.apply(us, (ft).values());
         });
         return Multi.of(...us);
@@ -247,8 +247,8 @@ class Async<T> implements Processed<Async<unknown>, T> {
 
     public flatMap<U>(f: (t: T) => Async<U>): Async<U> {
         const pau: Promise<Async<U>> = this.future_t.then(f);
-        const executor = (resolve, reject) => pau.then(au => au.future_t.then(resolve).catch(reject));
-        return Async.ofPromise(new Promise<U>(executor));
+        const completer = (resolve, reject) => pau.then(au => au.future_t.then(resolve).catch(reject));
+        return Async.ofPromise(new Promise<U>(completer));
     }
 
     public toString(): string {
@@ -262,7 +262,7 @@ function async_square(x: number): Async<number> {
 
 function test_async_square(t: number) {
     const async_u = async_square(t);
-    console.log(`-> ${async_u}`);
+    console.log(`${async_u}`);
     async_u.flatMap(u => {
         console.log(`async_square(${t}) = ${u}`);
         return Async.ofValue(u);
@@ -277,12 +277,12 @@ function compose<T, U, V, PU extends Processed<PU, U>,
                 (f: (t: T) => PU, g: (u: U) => PV, make: (pv: PV) => PPV): (t: T) => PPV {
     return (t: T) => {
         const pu: PU = f(t);
-        console.log(`f(${t}) = ${pu}`);
+        console.log(`-> f(${t}) = ${pu}`);
         const gfx = pu.flatMap((u: U) => {
             const pv: PV = g(u);
             return <PU><unknown>make(pv);
         });
-        console.log(`f(${t}).flatMap(g) = ${gfx}`);
+        console.log(`-> f(${t}).flatMap(g) = ${gfx}`);
         return <PPV><unknown>gfx;
     };
 }
