@@ -62,17 +62,19 @@ function test_multi_sqrt(xs: Multi<number>) {
 
 function test_multi_product(xs: Multi<number>, ys: Multi<number>) {
     const zs = xs.flatMap(x => {
-        return ys.flatMap(y => new Multi<number>(x * y));
+        return ys.flatMap(y => new Multi<number>(x * y, x + y));
     });
     console.log(`multi_product(${xs}, ${ys})) = ${zs}`);
 }
 
-test_sqrt(0);
-test_sqrt(2);
-test_sqrt(4);
-test_sqrt2(4);
-test_sqrt2(16);
-test_multi_sqrt(new Multi<number>(0, 1, 4));
+// test_sqrt(-1);
+// test_sqrt(0);
+// test_sqrt(2);
+// test_sqrt(4);
+
+// test_sqrt2(4);
+// test_sqrt2(16);
+// test_multi_sqrt(new Multi<number>(0, 1, 4));
 test_multi_product(new Multi<number>(1, 2, 3), new Multi<number>(5, 7));
 
 }

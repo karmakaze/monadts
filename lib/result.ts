@@ -38,7 +38,7 @@ class Result<T> {
         if (this.isEmpty()) {
             return `Result.error(${this._error})`;
         }
-        return `Result.value(${this._value})`;
+        return `Result(${this._value})`;
     }
 }
 
@@ -65,8 +65,9 @@ function test_sqrt2(x: number) {
     console.log(`sqrt(sqrt(${x})) = ${y2}`);
 }
 
-test_sqrt(2);
-test_sqrt(4);
+// test_sqrt(2);
+// test_sqrt(4);
+
 test_sqrt2(-1);
 test_sqrt2(4);
 test_sqrt2(16);

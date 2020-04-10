@@ -37,6 +37,9 @@ class Maybe<T> implements Processed<Maybe<unknown>, T> {
     }
 
     public toString() : string {
+        if (this.x === undefined) {
+            return "Maybe.nothing()";
+        }
         return `Maybe(${this.x})`;
     }
 }

@@ -33,6 +33,9 @@ class Maybe<T> {
     }
 
     public toString() : string {
+        if (this.x === undefined) {
+            return `Maybe.nothing()`;
+        }
         return `Maybe(${this.x})`;
     }
 }
@@ -55,13 +58,14 @@ function test_sqrt(x: number) {
 
 function test_sqrt2(x: number) {
     const y1 = sqrt(x);
-    const y2 = y1.isEmpty() ? Maybe.nothing() : sqrt(y1.unwrap());
-    // const y2 = y1.flatMap(sqrt);
+    // const y2 = y1.isEmpty() ? Maybe.nothing() : sqrt(y1.unwrap());
+    const y2 = y1.flatMap(sqrt);
     console.log(`sqrt(sqrt(${x})) = ${y2}`);
 }
 
-test_sqrt(2);
-test_sqrt(4);
+// test_sqrt(2);
+// test_sqrt(4);
+test_sqrt2(2);
 test_sqrt2(4);
 test_sqrt2(16);
 
