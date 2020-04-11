@@ -1,75 +1,56 @@
-#!/usr/bin/env ./node_modules/.bin/ts-node
-
-namespace Result {
-
-class Result<T> {
-    _value: T | undefined;
-    _error: any;
-
-    public static value<T>(value: T): Result<T> {
-        return new Result<T>(value, undefined);
+abstract class Result<T, E> implements Monad<Result<any, any>, T> {
+    public static value<V, E>(value: V): Result<V, E> {
+        // placeholder body replaced at bottom after Value declaration
+        return null;
     }
 
-    public static error<T>(error: any): Result<T> {
-        return new Result<T>(undefined, error);
+    public static error<V, E>(error: E): Result<V, E> {
+        // placeholder body replaced at bottom after Error declaration
+        return null;
     }
 
-    private constructor(value: T|undefined, error: any) {
-        this._value = value;
-        this._error = error;
+    abstract then<R>(f: (t: T) => Monad<Result<any, E>, R>): Result<R, E>;
+
+    public zero<V>(): Result<V, E> {
+        return Maybe.NONE;
     }
 
-    public isEmpty(): boolean {
-        return this._value === undefined;
-    }
-
-    public value(): T | undefined {
-        return this._value;
-    }
-
-    public flatMap<U>(f: (x: T) => Result<U>): Result<U> {
-        if (this._value) {
-            return f(this._value);
+    public unit<V, E>(v: V): Result<V, E> {
+        if (v === null || v === undefined) {
+            return Maybe.NONE;
         }
-        return Result.error(this._error);
+        return Maybe.some(v);
     }
 
-    public toString() : string {
-        if (this.isEmpty()) {
-            return `Result.error(${this._error})`;
-        }
-        return `Result(${this._value})`;
+    public static cast<V, E>(mv: Monad<Result<any, E>, V>): Result<V, E> {
+        return mv as Result<V, E>;
     }
 }
 
-function sqrt(x: number): Result<number> {
-    if (x < 0) {
-        return Result.error(`can't take root of ${x}`);
+class ResultError<E> extends Result<any, E> {
+    private error: E;
+
+    constructor(error: E) {
+        super();
+        this.error = error;
     }
-    const root_x = Math.sqrt(x);
-    if (root_x % 1 === 0) {
-        return Result.value(root_x);
+
+    public then<R>(f: (v: any) => Monad<Result<any, E>, R>): Result<R, E> {
+        return Result.cast<R, E>(this);
     }
-    return Result.error(`root of ${x} is not whole`);
 }
+Result.error = <E>(error: E) => new ResultError<E>(error);
 
-function test_sqrt(x: number) {
-    const y = sqrt(x);
-    console.log(`sqrt(${x}) = ${y}`);
+class ResultValue<V> extends Result<V, any> {
+    private value: V;
+
+    constructor(value: V) {
+        super();
+        this.value = value;
+    }
+
+    public then<R, E>(f: (v: V) => Monad<Result<any, E>, R>): Result<R, E> {
+        return Result.cast<R, E>(f(this.value));
+    }
 }
-
-function test_sqrt2(x: number) {
-    const y1 = sqrt(x);
-    // const y2 = y1.isEmpty() ? Result.error(undefined) : sqrt(y1.value());
-    const y2 = y1.flatMap(sqrt);
-    console.log(`sqrt(sqrt(${x})) = ${y2}`);
-}
-
-// test_sqrt(2);
-// test_sqrt(4);
-
-test_sqrt2(-1);
-test_sqrt2(4);
-test_sqrt2(16);
-
-}
+Result.value = <V, E>(v: V) => (v === null || v === undefined ? new ResultError<E>(null) : new ResultValue<V>(v));
